@@ -4,29 +4,122 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phishing URL Detector</title>
+
+  <!-- Page Styling -->
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 640px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    h1 { font-size: 1.6rem; margin-bottom: 6px; }
+    .subtitle { color: #94a3b8; margin-bottom: 28px; font-size: .95rem; }
+    form { display: flex; gap: 10px; margin-bottom: 24px; }
+    input[type="text"] {
+      flex: 1;
+      padding: 13px 16px;
+      border-radius: 10px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 1rem;
+    }
+    input[type="text"]:focus { outline: 2px solid #38bdf8; border-color: transparent; }
+    button {
+      padding: 13px 26px;
+      border: none;
+      border-radius: 10px;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    button:hover { background: #7dd3fc; }
+    .verdict {
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .verdict h2 { font-size: 1.8rem; letter-spacing: 2px; }
+    .verdict .score { color: inherit; opacity: .85; margin-top: 4px; }
+    .SAFE       { background: rgba(34,197,94,.15);  border: 1px solid #22c55e; color: #4ade80; }
+    .SUSPICIOUS { background: rgba(234,179,8,.15);  border: 1px solid #eab308; color: #facc15; }
+    .PHISHING   { background: rgba(239,68,68,.15);  border: 1px solid #ef4444; color: #f87171; }
+    .rules { list-style: none; }
+    .rules li {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: .92rem;
+    }
+    .weight { color: #f87171; font-weight: 700; }
+    .checked-url {
+      word-break: break-all;
+      color: #94a3b8;
+      font-size: .85rem;
+      margin-bottom: 16px;
+    }
+    .error { color: #f87171; margin-bottom: 16px; }
+    .no-rules { color: #4ade80; text-align: center; font-size: .95rem; }
+  </style>
 </head>
 <body>
+  
+  <!-- Main Container -->
+  <div class="card">
+    <h1>&#128737;&#65039; Phishing URL Detector</h1>
+    <p class="subtitle">Paste a URL below to analyze it with 12 heuristic security checks.</p>
 
-<h1>Phishing URL Detector</h1>
-<form method="POST">
-  <input
-    type="text"
-    name="url"
-    placeholder="https://example.com/login"
-    required
-    value="{{ result.url if result else '' }}"
-  >
+    <!-- URL Input Form -->
+    <form method="POST">
+      <input type="text" name="url" placeholder="https://example.com/login" required
+             value="{{ result.url if result else '' }}">
+      <button type="submit">Analyze</button>
+    </form>
 
-  <button type="submit">
-      Analyze
-  </button>
-</form>
-  {% if error %}
-...
-{% endif %}
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
 
-{% if result %}
-...
-{% endif %}
+    {% if result %}
+      <p class="checked-url">Analyzed: {{ result.url }}</p>
+      <div class="verdict {{ result.verdict }}">
+        <h2>{{ result.verdict }}</h2>
+        <p class="score">Risk score: {{ result.score }}</p>
+      </div>
+
+      {% if result.triggered_rules %}
+        <ul class="rules">
+          {% for rule in result.triggered_rules %}
+            <li><span>{{ rule.reason }}</span><span class="weight">+{{ rule.weight }}</span></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="no-rules">&#10003; No suspicious characteristics detected.</p>
+      {% endif %}
+    {% endif %}
+  </div>
 </body>
 </html>
