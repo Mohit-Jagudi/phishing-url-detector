@@ -84,3 +84,50 @@ def check_double_slash_redirect(url):
 def check_encoded_chars(url):
     """Rule: heavy use of percent-encoding or hex to obscure the URL."""
     return len(re.findall(r"%[0-9a-fA-F]{2}", url)) >= 3
+
+RULES = [
+    (check_ip_address, 30, "Hostname is a raw IP address"),
+    (check_url_length, 10, "URL is unusually long (>75 chars)"),
+    (check_at_symbol, 25, "Contains '@' symbol (address-hiding trick)"),
+    (check_subdomain_count, 20, "Excessive number of subdomains"),
+    (check_suspicious_tld, 15, "Uses a TLD commonly abused for phishing"),
+    (check_no_https, 10, "Not served over HTTPS"),
+    (check_url_shortener, 15, "Uses a URL-shortening service"),
+    (check_hyphenated_brand, 25, "Brand name obfuscated with hyphens"),
+    (check_punycode, 25, "Punycode domain (possible homoglyph attack)"),
+    (check_suspicious_keywords, 15, "Multiple phishing bait keywords"),
+    (check_double_slash_redirect, 15, "Double-slash redirect in path"),
+    (check_encoded_chars, 10, "Heavy percent-encoding in URL"),
+]
+
+
+def analyze_url(url):
+    """Run all rules against a URL.
+
+    Returns a dict with score, verdict, and triggered rule details.
+    """
+    url = url.strip()
+    if not url:
+        raise ValueError("URL must not be empty")
+
+    triggered = []
+    score = 0
+    for rule, weight, reason in RULES:
+        try:
+            hit = rule(url)
+        except Exception:  # malformed URLs should not crash a single rule
+            hit = False
+        if hit:
+            score += weight
+            triggered.append({"rule": rule.__name__, "weight": weight, "reason": reason})
+
+    if score >= 50:
+        verdict = "PHISHING"
+    elif score >= 20:
+        verdict = "SUSPICIOUS"
+    else:
+        verdict = "SAFE"
+
+    return {"url": url, "score": score, "verdict": verdict, "triggered_rules": triggered}
+
+
