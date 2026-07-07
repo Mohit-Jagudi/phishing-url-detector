@@ -36,3 +36,29 @@ COMMON_BRANDS = {
     "sbi", "hdfc", "icici",
     "paytm",
 }
+
+def check_suspicious_tld(url):
+    """Rule: TLD is commonly abused for phishing campaigns."""
+    host, _ = _hostname(url)
+    return host.rsplit(".", 1)[-1] in SUSPICIOUS_TLDS if "." in host else False
+
+
+def check_no_https(url):
+    """Rule: page is not served over HTTPS."""
+    _, parsed = _hostname(url)
+    return parsed.scheme != "https"
+
+
+def check_url_shortener(url):
+    """Rule: URL shorteners hide the real destination."""
+    host, _ = _hostname(url)
+    return host in URL_SHORTENERS
+
+
+def check_hyphenated_brand(url):
+    """Rule: brand name combined with hyphens, e.g. pay-pal-secure.com."""
+    host, _ = _hostname(url)
+    if "-" not in host:
+        return False
+    squashed = host.replace("-", "")
+    return any(brand in squashed for brand in COMMON_BRANDS)
