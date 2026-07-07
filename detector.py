@@ -7,3 +7,32 @@ from urllib.parse import urlparse
 def _hostname(url):
     parsed = urlparse(url if "://" in url else "http://" + url)
     return (parsed.hostname or "").lower(), parsed
+SUSPICIOUS_TLDS = {
+    "xyz", "tk", "top", "ml", "ga", "cf", "gq", "buzz", "club",
+    "work", "link", "click", "rest", "zip", "country", "stream",
+}
+
+URL_SHORTENERS = {
+    "bit.ly", "tinyurl.com", "goo.gl", "t.co", "ow.ly",
+    "is.gd", "buff.ly", "rebrand.ly", "cutt.ly",
+    "shorturl.at", "rb.gy",
+}
+
+SUSPICIOUS_KEYWORDS = {
+    "verify", "account", "update", "secure",
+    "banking", "login", "signin",
+    "confirm", "password",
+    "credential", "wallet",
+    "suspend", "unlock",
+    "invoice", "urgent",
+}
+
+COMMON_BRANDS = {
+    "paypal", "apple", "amazon",
+    "google", "microsoft",
+    "netflix", "facebook",
+    "instagram", "whatsapp",
+    "icloud", "outlook",
+    "sbi", "hdfc", "icici",
+    "paytm",
+}
