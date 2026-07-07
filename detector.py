@@ -62,3 +62,25 @@ def check_hyphenated_brand(url):
         return False
     squashed = host.replace("-", "")
     return any(brand in squashed for brand in COMMON_BRANDS)
+
+def check_punycode(url):
+    """Rule: punycode ('xn--') domains can disguise homoglyph attacks."""
+    host, _ = _hostname(url)
+    return "xn--" in host
+
+
+def check_suspicious_keywords(url):
+    """Rule: phishing bait keywords appear in the URL."""
+    lowered = url.lower()
+    return sum(1 for kw in SUSPICIOUS_KEYWORDS if kw in lowered) >= 2
+
+
+def check_double_slash_redirect(url):
+    """Rule: '//' appearing in the path indicates a redirect trick."""
+    _, parsed = _hostname(url)
+    return "//" in parsed.path
+
+
+def check_encoded_chars(url):
+    """Rule: heavy use of percent-encoding or hex to obscure the URL."""
+    return len(re.findall(r"%[0-9a-fA-F]{2}", url)) >= 3
