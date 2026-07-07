@@ -14,6 +14,14 @@ URL_SHORTENERS = {
     "buff.ly", "rebrand.ly", "cutt.ly", "shorturl.at", "rb.gy",
 }
 
+SUSPICIOUS_HOSTS = {
+    "trycloudflare.com",
+    "ngrok.io",
+    "ngrok-free.app",
+    "serveo.net",
+    "loca.lt",
+}
+
 SUSPICIOUS_KEYWORDS = {
     "verify", "account", "update", "secure", "banking", "login",
     "signin", "confirm", "password", "credential", "wallet",
@@ -75,6 +83,12 @@ def check_url_shortener(url):
     """Rule: URL shorteners hide the real destination."""
     host, _ = _hostname(url)
     return host in URL_SHORTENERS
+    
+# Check if URL uses a temporary host
+def check_temporary_host(url):
+    """Rule: temporary hosting/tunneling services."""
+    host, _ = _hostname(url)
+    return any(host.endswith(domain) for domain in SUSPICIOUS_HOSTS)
 
 # Detect brand names hidden with hyphens
 def check_hyphenated_brand(url):
@@ -118,6 +132,7 @@ RULES = [
     (check_suspicious_tld, 15, "Uses a TLD commonly abused for phishing"),
     (check_no_https, 10, "Not served over HTTPS"),
     (check_url_shortener, 15, "Uses a URL-shortening service"),
+    (check_temporary_host, 20, "Uses a temporary hosting service"),
     (check_hyphenated_brand, 25, "Brand name obfuscated with hyphens"),
     (check_punycode, 25, "Punycode domain (possible homoglyph attack)"),
     (check_suspicious_keywords, 15, "Multiple phishing bait keywords"),
