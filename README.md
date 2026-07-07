@@ -19,6 +19,7 @@ The main objectives of this project are:
 
 - Rule-based phishing URL detection
 - 12 security checks
+- Detects temporary hosting services (Cloudflare Tunnel, Ngrok, LocalTunnel)
 - Risk score calculation
 - SAFE / SUSPICIOUS / PHISHING verdict
 - Flask-based web interface
